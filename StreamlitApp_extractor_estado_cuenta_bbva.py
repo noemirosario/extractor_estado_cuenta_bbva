@@ -101,19 +101,19 @@ st.set_page_config(page_title="Extractor BBVA", layout="centered")
 st.title("🏦 Extractor Estado de Cuenta BBVA")
 
 uploaded = st.file_uploader("📄 Sube tu PDF", type=["pdf"])
-account_type: Literal["debito", "credito"] = st.radio("Tipo de cuenta", ["débito", "crédito"], index=0)
+account_type: Literal["débito", "crédito"] = st.radio("Tipo de cuenta", ["débito", "crédito"], index=0)
 
 if uploaded:
     try:
         lines = pdf_to_lines(uploaded.read())
-        df = parse_debito(lines) if account_type == "debito" else parse_credito(lines)
+        df = parse_debito(lines) if account_type == "débito" else parse_credito(lines)
         if df.empty:
             st.error("No se encontraron movimientos.")
         else:
             st.subheader("📋 Movimientos")
             st.dataframe(df, use_container_width=True)
 
-            if account_type == "debito":
+            if account_type == "débito":
                 total_abono = df["Abono"].fillna(0).sum()
                 total_cargo = df["Cargo"].fillna(0).sum()
 
