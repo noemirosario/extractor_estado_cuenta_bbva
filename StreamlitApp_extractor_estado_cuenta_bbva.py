@@ -5,7 +5,7 @@ Streamlit app — Extrae movimientos de estados de cuenta BBVA (débito y crédi
 y permite descargar un Excel con dos pestañas (Movimientos / Totales).
 
 Ejecuta:
-    streamlit run bbva_statement_app.py
+    streamlit run StreamlitApp_extractor_estado_cuenta_bbva.py.py
 Requisitos:
     pip install streamlit pdfplumber pandas openpyxl
 """
