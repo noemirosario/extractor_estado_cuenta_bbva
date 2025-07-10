@@ -47,34 +47,63 @@ def parse_debito(lines: List[str]) -> pd.DataFrame:
     while i < n:
         head = RE_FECHA_DEB.match(lines[i])
         if not head:
-            i += 1; continue
+            i += 1
+            continue
+
+        # EXTRAER FECHAS
+        fecha_oper = head.group(1)
+        fecha_liq = head.group(2)
+        tail = head.group(3)
+
         cargo = abono = None
         desc_parts: List[str] = []
-        tail = head.group(3)
+
+        # Buscar montos en la misma línea
         nums_head = RE_NUMS.findall(tail)
         if nums_head:
-            (cargo, abono) = (clean_num(nums_head[0]), None) if len(nums_head) > 1 else (None, clean_num(nums_head[0]))
+            if len(nums_head) > 1:
+                cargo = clean_num(nums_head[0])
+            else:
+                abono = clean_num(nums_head[0])
             tail = RE_NUMS.sub("", tail).strip()
+
         if tail:
             desc_parts.append(tail)
+
         i += 1
+        # Buscar líneas adicionales hasta la siguiente cabecera
         while i < n and not RE_FECHA_DEB.match(lines[i]):
             l = lines[i]
             if not l or "referencia" in l.lower():
-                i += 1; continue
+                i += 1
+                continue
             nums = RE_NUMS.findall(l)
             if nums and cargo is None and abono is None:
-                cargo, abono = (clean_num(nums[0]), None) if len(nums) > 1 else (None, clean_num(nums[0]))
+                if len(nums) > 1:
+                    cargo = clean_num(nums[0])
+                else:
+                    abono = clean_num(nums[0])
             elif not nums:
                 desc_parts.append(l)
             i += 1
+
         desc = " ".join(desc_parts)
         if "SPEI RECIBIDO" in desc.upper() and cargo is not None and abono is None:
             abono, cargo = cargo, None
         if cargo is None and abono is None:
             continue
-        rows.append({"Descripción": desc, "Cargo": cargo, "Abono": abono})
+
+        # AGREGAR FECHAS AL RESULTADO
+        rows.append({
+            "Fecha Oper": fecha_oper,
+            "Fecha Liq": fecha_liq,
+            "Descripción": desc,
+            "Cargo": cargo,
+            "Abono": abono
+        })
+
     return pd.DataFrame(rows)
+
 
 # ───────────────────────── Parse crédito ────────────────────────────────────
 def parse_credito(lines: List[str]) -> pd.DataFrame:
