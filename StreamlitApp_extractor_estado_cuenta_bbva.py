@@ -77,7 +77,6 @@ def parse_debito(lines: List[str]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 # ───────────────────────── Parse crédito ────────────────────────────────────
-
 def parse_credito(lines: List[str]) -> pd.DataFrame:
     rows = []
     for l in lines:
@@ -93,7 +92,15 @@ def parse_credito(lines: List[str]) -> pd.DataFrame:
             "Descripción del movimiento": m.group("desc"),
             "Monto": monto,
         })
-    return pd.DataFrame(rows)
+
+    df = pd.DataFrame(rows)
+
+    # Convertir las columnas de fecha a tipo datetime
+    for col in ["Fecha de la operación", "Fecha de cargo"]:
+        df[col] = pd.to_datetime(df[col], errors='coerce', dayfirst=True)
+
+    return df
+
 
 # ───────────────────────── Streamlit UI ────────────────────────────────────
 
