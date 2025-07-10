@@ -102,7 +102,15 @@ def parse_debito(lines: List[str]) -> pd.DataFrame:
             "Abono": abono
         })
 
-    return pd.DataFrame(rows)
+    # Crear DataFrame
+    df = pd.DataFrame(rows)
+
+    # Convertir columnas de fechas a datetime
+    for col in ["Fecha Oper", "Fecha Liq"]:
+        df[col] = pd.to_datetime(df[col], errors='coerce', dayfirst=True)
+
+    return df
+
 
 
 # ───────────────────────── Parse crédito ────────────────────────────────────
